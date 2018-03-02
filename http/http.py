@@ -44,9 +44,9 @@ class HttpParser:
         self.body = raw
 
     def print_info(self):
-        if self._is == 'request':
+        if   self._is == 'request':
             print(self.version, self.method, self.path)
-        if self._is == 'response':
+        elif self._is == 'response':
             print(self.version, self.status, self.message)
         else: return None
         print(self.headers)
