@@ -51,3 +51,12 @@ class HttpParser:
         else: return None
         print(self.headers)
         print(self.body)
+
+    def get_raw(self):
+        if   self._is == 'request':
+            infoline = "{0} {1} HTTP/{2}".format(self.method, self.path, self.version)
+        elif self._is == 'response':
+            infoline = "HTTP/{0} {1} {2}".format(self.version, self.status, self.message)
+        raw = infoline + CRLF + CRLF.join([k+': '+v for k, v in self.headers.items()]) \
+            + CRLF*2 + self.body
+        return raw
