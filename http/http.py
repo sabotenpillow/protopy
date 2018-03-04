@@ -55,16 +55,18 @@ class HttpParser:
         self.rawbody = raw
         self.body    = raw
         if 'Transfer-Encoding' in self.headers:
-            # if 'chunked' in self.headers['Transfer-Encoding']:
-            self.body = HttpParser.decompress(raw, self.headers['Transfer-Encoding'])
+            if 'chunked' in self.headers['Transfer-Encoding']:
+                self.body = bytes.join(b'', bytes.split(raw, B_CRLF)[1::2])
+            self.body = HttpParser.decompress(self.body, self.headers['Transfer-Encoding'])
         if 'Content-Encoding' in self.headers:
-            self.body = HttpParser.decompress(raw, self.headers['Content-Encoding'])
+            self.body = HttpParser.decompress(self.body, self.headers['Content-Encoding'])
         self.body = self.body.decode()
 
     @staticmethod
     def decompress(raw, comprsformat):
         if 'gzip' in comprsformat:
             return gzip.decompress(raw)
+        return raw
 
     def print_info(self):
         if   self._is == 'request':
