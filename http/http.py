@@ -10,6 +10,7 @@ class HttpParser:
         self.version = None
         self.headers = None
         self.body    = None
+        self.rawbody = None
         ## Request  : has "method", "path" too
         ## Response : has "status", "message" too
         self.parser(raw)
@@ -51,7 +52,19 @@ class HttpParser:
                 = [x.strip() for x in self.headers['Transfer-Encoding'].split(',')]
 
     def _body_parser(self, raw):
-        self.body = raw.decode()
+        self.rawbody = raw
+        self.body    = raw
+        if 'Transfer-Encoding' in self.headers:
+            # if 'chunked' in self.headers['Transfer-Encoding']:
+            self.body = HttpParser.decompress(raw, self.headers['Transfer-Encoding'])
+        if 'Content-Encoding' in self.headers:
+            self.body = HttpParser.decompress(raw, self.headers['Content-Encoding'])
+        self.body = self.body.decode()
+
+    @staticmethod
+    def decompress(raw, comprsformat):
+        if 'gzip' in comprsformat:
+            return gzip.decompress(raw)
 
     def print_info(self):
         if   self._is == 'request':
